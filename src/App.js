@@ -52,7 +52,6 @@ const Wrapper = styled.div`
     height: 100%;
     width: 100%;
     min-height: 0;
-    position: relative; // This style is what is causing the offset but it shouldn't matter at all
   }
 `;
 
@@ -72,7 +71,7 @@ const App = () => {
   const viewerRef = useRef(null);
   const viewerWrapperRef = useRef(null);
   const docViewer = React.useRef(null);
-  const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/smoke/13.pdf';
+  const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/LargeDocs/30000-nearnative.pdf';
 
   React.useEffect(() => {
     const scriptTag = document.querySelector('script[data-pdftron]');
