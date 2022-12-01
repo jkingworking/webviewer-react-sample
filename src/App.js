@@ -15,13 +15,12 @@ const Wrapper = styled.div`
     background-color: rgb(1, 41, 57);
     height: 100vh;
     position: relative;
-    flex: 0 0 auto;
-    width: 300px;
+    flex: 0 0 300px;
   }
 
   .viewer-center-renderer-panel {
     display: flex;
-    flex: 1 1 auto;
+    flex: 1;
     overflow: hidden;
   }
 
@@ -29,7 +28,7 @@ const Wrapper = styled.div`
     background-color: #cad1d4;
     display: flex;
     flex-direction: column;
-    flex: 0 1 100%;
+    width: 100%;
   }
 
   .renderer-header {
@@ -45,7 +44,7 @@ const Wrapper = styled.div`
     flex-direction: column;
     position: relative;
     right: 0;
-    min-width: 300px;
+    flex: 0 0 300px;
   }
 
   .renderer_wrapper {
@@ -71,7 +70,8 @@ const App = () => {
   const viewerRef = useRef(null);
   const viewerWrapperRef = useRef(null);
   const docViewer = React.useRef(null);
-  const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/LargeDocs/30000-nearnative.pdf';
+  // const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/smoke/1.pdf';
+  const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/smoke/2.pdf';
 
   React.useEffect(() => {
     const scriptTag = document.querySelector('script[data-pdftron]');
@@ -98,6 +98,9 @@ const App = () => {
       docViewer.current.loadDocument(documentUrl, {
         extension: 'pdf',
         docId: documentUrl
+      }).then(() => {
+        const displayMode = new window.Core.DisplayMode(docViewer.current, window.Core.DisplayModes.Single);
+        docViewer.current.getDisplayModeManager().setDisplayMode(displayMode);
       });
       docViewer.current.setToolMode(docViewer.current.getTool('TextSelect'));
     }, 1000);
@@ -116,8 +119,8 @@ const App = () => {
               </PDFViewerWrapper>
             </div>
           </section>
-          <section className="viewer2__meta-sidebar "/>
         </div>
+          <section className="viewer2__meta-sidebar "/>
       </div>
     </Wrapper>
   );
