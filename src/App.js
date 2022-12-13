@@ -1,5 +1,8 @@
 import React, { useRef } from 'react';
 import styled from 'styled-components';
+import {
+  RedactionOverlayFactory
+} from './customAnnotation/redactionOverlay';
 
 const Wrapper = styled.div`
   .viewer-outer-wrapper {
@@ -67,11 +70,41 @@ const PDFRenderer = styled.div`
 
 const scriptPath = `/webviewer/lib/core/`;
 
+const rand = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+const makeAnnotation = (docViewer, annotation, pageNumber) => {
+  const { Annotations } = window.Core;
+  const color = new Annotations.Color(rand(0, 256), rand(0, 256), rand(0, 256), 0.25);
+  const annot = new annotation(docViewer);
+  annot.PageNumber = pageNumber;
+  annot.Width = rand(50, 300);
+  annot.Height = rand(50, 300);
+  annot.Y = rand(10, 600);
+  annot.X = rand(10, 300);
+  annot.FillColor = color;
+  annot.StrokeColor = color;
+  return annot;
+}
+
+const makeAnnotations = (docViewer, annotation, perPage, pages) => {
+  const annotations = [];
+  for (let i = 0; i < pages; i++) {
+    for (let ii = 0; ii < perPage; ii++) {
+      annotations.push(makeAnnotation(docViewer, annotation, i));
+    }
+  }
+  return annotations;
+}
+
 const App = () => {
   const viewerRef = useRef(null);
   const viewerWrapperRef = useRef(null);
   const docViewer = React.useRef(null);
-  const documentUrl = 'https://vendor-pdf-demo-files.s3.us-west-2.amazonaws.com/LargeDocs/30000-nearnative.pdf';
+  const documentUrl = 'files/WarAndPeace.pdf';
 
   React.useEffect(() => {
     const scriptTag = document.querySelector('script[data-pdftron]');
@@ -95,9 +128,23 @@ const App = () => {
       viewerRef.current &&
       docViewer.current.setViewerElement(viewerRef.current);
       docViewer.current.enableAnnotations();
+
+      const RedactionOverlay = RedactionOverlayFactory();
+      docViewer.current.getAnnotationManager().registerAnnotationType(
+        RedactionOverlay.prototype.elementName,
+        RedactionOverlay
+      );
       docViewer.current.loadDocument(documentUrl, {
         extension: 'pdf',
         docId: documentUrl
+      }).then(() => {
+        console.log('Document loaded, adding annotations');
+        console.time('Creating 8,000 annotations');
+        const annotations = makeAnnotations(docViewer, RedactionOverlay, 16, 500);
+        console.timeEnd('Creating 8,000 annotations');
+        console.time('Rendering 8,000 annotations');
+        docViewer.current.getAnnotationManager().addAnnotations(annotations);
+        console.timeEnd('Rendering 8,000 annotations');
       });
       docViewer.current.setToolMode(docViewer.current.getTool('TextSelect'));
     }, 1000);
